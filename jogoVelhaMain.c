@@ -10,9 +10,9 @@ jogadas aleatorias e testando se alguem tivesses ganhado...
 Mas eu achei algumas regras (dicas): Estrategias comuns para jogar:
 Jogar no centro, cantos opostos, laterais, etc...
 de maneira mais inteligente, e implementei nesse
-pequeno projeto. Espero que caiba na memoria do PIC 12F675
+pequeno projeto. Espero que caiba na memoria do PIC 12F675 (e coube!)
 
- *******************************************************************************/
+*******************************************************************************/
 
 
 #include <xc.h>
@@ -56,7 +56,7 @@ char displayCount = 0; // para mostrar cada linha na interrupcao.
 
 void setUp() { // Configuracao dos Registradores especiais:
 
-    TRISIO = 0b00001000; // Diz quais pinos sao output(0) e quais sao input(1). Pin 3 eh input (teclas)
+    TRISIO = 0b00001000; // Diz quais pinos sao output(0) e quais sao input(1). Pin 4 do PIC (GPIO3) eh input (teclas)
     ANSEL = 0b00000000; // Configura ANSEL. Todos digitais
     CMCON = 0b00000111; // Desabilita os comparadores
     VRCON = 0b00000000; // Voltagem de ref dos comparadores;
@@ -72,7 +72,7 @@ void setUp() { // Configuracao dos Registradores especiais:
 
 // Rotina da interrupcao:
 // Aqui se acendem os LEDs e
-// Le cada tecla, se pressionada, salva na variavel.
+// Le cada tecla, se pressionada, salva na variavel global.
 
 void __interrupt() isr() { //interruption vector
 
@@ -234,7 +234,7 @@ char checar_vitoria(char jogador) {
 
 // Aqui ele mostra o vencedor, piscando as posicoes de vitoria:
 // Poderia melhorar, piscando apenas a parte que da a vitoria, mas nao tem
-// memoria ROM suficiente para o codigo.
+// memoria ROM suficiente para o codigo. Usei 99% de toda a ROM disponivel.
 
 void mostrar_vencedor(char jogador) {
 
@@ -244,9 +244,9 @@ void mostrar_vencedor(char jogador) {
     for (int x = 1; x < 10; x++) if (tab[x] != jogador) tab[x] = VAZIO;
 
     for (int x = 1; x < 10; x++) {
-        GIE = 0; // Desabilita interrupções globais (Apaga todos os LEDs)
+        GIE = 0; // Desabilita interrupÃ§Ãµes globais (Apaga todos os LEDs)
         __delay_ms(200);
-        GIE = 1; // Habilita interrupções globais (Acende os LEDs, no caso, somente do vencedor)
+        GIE = 1; // Habilita interrupÃ§Ãµes globais (Acende os LEDs, no caso, somente do vencedor)
         __delay_ms(200);
     }
 }
@@ -312,10 +312,10 @@ char cpu_joga() {
 
     //
     // Estrategia: 5. Qualquer canto vazio:
-    // Jogar no no que estiver disponivel:
+    // Jogar no que estiver disponivel:
     // Jogadas em cantos aleatorios disponiveis:
     static const char cantos[4] = {1, 3, 9, 7}; // ordem base: superior-esquerdo, superior-direito, inferior-direito, inferior-esquerdo
-    char offset = TMR0 & 0b00000111; // TMR0 & 0x03  ? valor entre 0 e 3
+    char offset = TMR0 & 0b00000111; // TMR0 & 0x03 => valor entre 0 e 3 - Aqui fiz um Random usando TMR0 para o jogo nao ser repetitivo.
 
     // Verifica os cantos em ordem rotativa: offset, offset+1, ...
     for (char i = 0; i < 4; i++) {
@@ -361,7 +361,7 @@ int main(void) {
 
         while (jogadas < 9 && vencedor == 255) { // Jogo valendo
 
-            if (vezDeJogar == USUARIO) { // So sai daqui com uma jogada valida.
+            if (vezDeJogar == USUARIO) { // Soh sai daqui com uma jogada valida.
 
                 // Aguarda e valida jogada do usuario:
 loop:
@@ -371,7 +371,7 @@ loop:
                     // For a vez do usuario jogar
                     // E nenhuma tecla sendo pressionada
                 }
-                // E se a tecla pressionada não for numa casa vazia.
+                // E se a tecla pressionada nÃ£o for numa casa vazia.
                 if (tab[tecla] != VAZIO) goto loop;
 
                 // Passou pelo loop. USUARIO pressionou uma tecla valida
